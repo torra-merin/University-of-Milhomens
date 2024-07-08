@@ -7,7 +7,7 @@ At the same time, in a society obsessed with degrees and certifications, we find
 
 This is where the University of Milhomens comes in: it’s a small project I created for fun where everyone can get the title they want from a mock university. It will be blockchain-validated for as long as the blockchain keeps running (currently, it’s only deployed on the Sepolia Test-Net). That’s why the university is called this. “Milhomens,” in Catalan, means someone who thinks they are fit for everything, who wants to intervene in everything, and wants to know everything (DIEC2).
 
-To try this project, you can access its IPFS page (you'll need a web3 provider and some Sepolia test-net eth): https://dweb.link/ipfs/QmdjeFVd4e9q6ANqEL3oUkGXmUDznAnTgfyvyBmVAJzUaB
+To try this project, you can access its IPFS page (you'll need a web3 provider and some Sepolia test-net eth): https://dweb.link/ipfs/QmPFun5qNEgVCyxsqxEaSGH2Ve26W5MWegPTCiea4smRYc
 
 Or interact directly with the contract on the Sepolia Test-Net: 0x60178B17a568b906ADbB366dB5c66ADef6410cBe
 
