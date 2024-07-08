@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="logo.png">
+    <title>Degree Validation | University of Milhomens</title>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+            background-image: linear-gradient(0deg, rgb(255 255 255 / 50%), rgb(255 255 255 / 50%)), url(/background_original.jpg);
+
+        }
+        h1 {
+            text-align: center;
+            color: #04152F;
+        }
+        #pdfContainer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 80vh;
+            border: 2px dashed #ddd;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        p {
+            font-size: 18px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Degree Validation</h1>
+    <div id="pdfContainer"></div>
+
+    <script>
+        const contractAddress = '0x60178B17a568b906ADbB366dB5c66ADef6410cBe';
+        const contractABI = [
+            {
+                "inputs": [
+                    {
+                        "internalType": "string",
+                        "name": "_name",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "_degreeName",
+                        "type": "string"
+                    }
+                ],
+                "name": "register",
+                "outputs": [
+                    {
+                        "internalType": "bytes32",
+                        "name": "",
+                        "type": "bytes32"
+                    }
+                ],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "anonymous": false,
+                "inputs": [
+                    {
+                        "indexed": true,
+                        "internalType": "bytes32",
+                        "name": "hash",
+                        "type": "bytes32"
+                    },
+                    {
+                        "indexed": false,
+                        "internalType": "string",
+                        "name": "name",
+                        "type": "string"
+                    },
+                    {
+                        "indexed": false,
+                        "internalType": "string",
+                        "name": "degreeName",
+                        "type": "string"
+                    },
+                    {
+                        "indexed": false,
+                        "internalType": "uint256",
+                        "name": "timestamp",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "UserRegistered",
+                "type": "event"
+            },
+            {
+                "inputs": [],
+                "name": "getUserHashes",
+                "outputs": [
+                    {
+                        "internalType": "bytes32[]",
+                        "name": "",
+                        "type": "bytes32[]"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "bytes32",
+                        "name": "hash",
+                        "type": "bytes32"
+                    }
+                ],
+                "name": "getUserInfo",
+                "outputs": [
+                    {
+                        "internalType": "string",
+                        "name": "",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "timestamp",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "userHashes",
+                "outputs": [
+                    {
+                        "internalType": "bytes32",
+                        "name": "",
+                        "type": "bytes32"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "bytes32",
+                        "name": "",
+                        "type": "bytes32"
+                    }
+                ],
+                "name": "userInfos",
+                "outputs": [
+                    {
+                        "internalType": "string",
+                        "name": "name",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "degreeName",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "timestamp",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            }
+        ];
+
+        async function getUserInfo() {
+            const url = new URL(window.location.href);
+            const hash = url.hash.split('#')[1].split('?seed=')[0];
+            const seed = url.hash.split('?seed=')[1];
+
+            if (window.ethereum && hash) {
+                try {
+                    const web3 = new Web3(window.ethereum);
+                    const contract = new web3.eth.Contract(contractABI, contractAddress);
+
+                    const userInfo = await contract.methods.getUserInfo(hash).call();
+                    const name = userInfo[0];
+                    const degreeName = userInfo[1];
+                    const timestamp = new Date(userInfo[2] * 1000); // Convert Unix timestamp to JavaScript Date object
+
+                    let decryptedName = name;
+                    let decryptedDegreeName = degreeName;
+
+                    if (seed) {
+                        decryptedName = CryptoJS.AES.decrypt(name, seed).toString(CryptoJS.enc.Utf8);
+                        decryptedDegreeName = CryptoJS.AES.decrypt(degreeName, seed).toString(CryptoJS.enc.Utf8);
+                    }
+
+                    const degreeInfo = {
+                        name: decryptedName,
+                        degreeName: decryptedDegreeName,
+                        timestamp: timestamp ? `${timestamp.getDate()}/${timestamp.getMonth() + 1}/${timestamp.getFullYear()}` : 'N/A',
+                        url: window.location.href,
+                    };
+
+                    generateAndDisplayPDF(degreeInfo);
+                } catch (error) {
+                    console.error('Error retrieving user info:', error);
+                    displayError('Error retrieving user info. See console for details.');
+                }
+            } else {
+                displayError('Please provide a valid hash in the URL or install MetaMask.');
+            }
+        }
+
+        function generateAndDisplayPDF(degreeInfo) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'landscape' });
+
+            // Load background image
+            const img = new Image();
+            img.src = 'background.jpg';
+            img.onload = function() {
+                const imgWidth = doc.internal.pageSize.width;
+                const imgHeight = doc.internal.pageSize.height;
+                const imgAspectRatio = img.width / img.height;
+                const pdfAspectRatio = imgWidth / imgHeight;
+
+                let width;
+                let height;
+
+                if (pdfAspectRatio > imgAspectRatio) {
+                    width = imgWidth;
+                    height = imgWidth / imgAspectRatio;
+                } else {
+                    width = imgHeight * imgAspectRatio;
+                    height = imgHeight;
+                }
+
+                doc.addImage(img, 'JPEG', 0, 0, doc.internal.pageSize.width, doc.internal.pageSize.height);
+
+                // Set font style
+
+                // Title
+
+                doc.setFontSize(40);
+                doc.setFont('times', 'bold');
+                const capDegree = degreeInfo.degreeName.toUpperCase();
+                doc.text(`${capDegree}`, doc.internal.pageSize.width / 2, 37, { align: 'center' });
+
+                // Content
+                doc.setFontSize(20);
+                doc.setFont('times', 'italic');
+                doc.text(`Name`, doc.internal.pageSize.width / 2, 57, { align: 'center' });
+                doc.setFontSize(30);
+                doc.setFont('times', 'bold');
+                const capName = degreeInfo.name.toUpperCase();
+                doc.text(`${capName}`, doc.internal.pageSize.width / 2, 73, { align: 'center' });
+                doc.setFont('times', 'italic');
+
+                // Transaction timestamp
+                doc.setFont('times', 'italic');
+                doc.setFontSize(14);
+                doc.text(`Date of expedition`, doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 50, { align: 'center' });
+                doc.setFont('times', 'bold');
+                doc.setFontSize(19);
+                doc.text(`${degreeInfo.timestamp}`, doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 40, { align: 'center' });
+
+
+                // Certification footer
+                doc.setFont('times', 'italic');
+                doc.setFontSize(14);
+                doc.text("Certified by the University of Milhomens", doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 20, { align: 'center' });
+
+                // Shortened URL
+                const indexHash = degreeInfo.url.indexOf('#');
+                const shortenedUrl = indexHash !== -1 ? degreeInfo.url.slice(indexHash) : degreeInfo.url;
+                const fullUrl = degreeInfo.url;
+
+                // Create a clickable link
+                doc.setFontSize(10);
+                doc.setFillColor(255, 255, 255); // White background for the link
+                doc.setFont('times', 'italic');
+                doc.textWithLink(`Verification code: ${shortenedUrl}`, doc.internal.pageSize.width / 2,  doc.internal.pageSize.height - 10, { url: fullUrl, align: 'center' });
+
+
+                // Output PDF as data URI
+                const pdfDataUri = doc.output('datauristring');
+                const pdfEmbed = `<div style="text-align: center; width: 100%;">
+                                      <embed width="90%" height="600px" src="${pdfDataUri}" />
+
+                                      <p class="validation-text" style="color: green; font-style:italic;padding-top:20px;">The University of Milhomens has verified the code as correct.</p>
+                                  </div>`;
+
+                document.getElementById('pdfContainer').innerHTML = pdfEmbed;
+            };
+        }
+
+        function displayError(message) {
+            document.getElementById('pdfContainer').innerHTML = `<p style="color: red;">${message}</p>`;
+        }
+
+        window.onload = getUserInfo;
+    </script>
+</body>
+</html>
