@@ -11,7 +11,9 @@ To try this project, you can access its IPFS page (you'll need a web3 provider a
 
 Or interact directly with the contract on the Sepolia Test-Net: 0x60178B17a568b906ADbB366dB5c66ADef6410cBe
 
-_Example certification: [https://bafybeianutjcxal5suuo7reipoxleotvzkhzcrfszrkuj6usjp6f74jrfe.ipfs.dweb.link/validate/#0xa8cbae17799c5747e3086e75358ebad0008d9e3bcaf543484eedd6af79246c44?seed=encryption-seed](https://bafybeianutjcxal5suuo7reipoxleotvzkhzcrfszrkuj6usjp6f74jrfe.ipfs.dweb.link/validate/#0xa8cbae17799c5747e3086e75358ebad0008d9e3bcaf543484eedd6af79246c44?seed=encryption-seed)_
+_Example validation code & certification: [#0xa8cbae17799c5747e3086e75358ebad0008d9e3bcaf543484eedd6af79246c44?seed=encryption-seed](https://bafybeianutjcxal5suuo7reipoxleotvzkhzcrfszrkuj6usjp6f74jrfe.ipfs.dweb.link/validate/#0xa8cbae17799c5747e3086e75358ebad0008d9e3bcaf543484eedd6af79246c44?seed=encryption-seed)_
+
+
 
 ***
 
